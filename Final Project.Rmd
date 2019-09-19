@@ -1,0 +1,70 @@
+---
+title: "QTM 150 project"
+author: "Seungmin Jung, Denny Kim"
+date: "4/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(plotly)
+
+```
+###Research Question
+There are many research about how the number of terror increased rapidly in the US after the 9/11 incident. We want to explore if the number of fatalities from terrorism increased post 9/11 in other regions as it did in the US. We got the data fram from "Our World In Data."
+
+###Import Data
+```{r}
+terrorist <- read.csv("terrorist-incidents.csv")
+```
+
+###Manipulating Data 
+```{r}
+terror_region<-terrorist%>%
+  filter(Entity=="Eastern Europe"| Entity=="Western Europe"|Entity=="Central America & Caribbean"|Entity=="South America"|Entity=="North America"|Entity=="Central Asia"|Entity=="East Asia"|Entity=="Central Asia"|Entity=="Southeast Asia"|Entity=="South Asia"|Entity=="Sub-Saharan Africa"|Entity=="Middle East & North Africa") %>%
+  select(Entity, Year, Number.of.terrorist.incidents..GDT..2018...incidents.)
+
+names(terror_region)<-c("Region","Year","Terror_Casualties")
+```
+We wanted to see the change in frequency of terrorism in different regions post 9/11 by looking at the number of fatalities, so we decided to compile the dataset to only include regions. We also deleted unneccesary variable, which is "Regional code." Then we revised the header to assist reader's understanding of the variables we are dealing with. 
+
+###Visualizations
+####Figure 1
+```{r}
+Sum_Terror<-terror_region%>%
+  group_by(Region)%>%
+  summarize(SumCasualties=sum(Terror_Casualties,na.rm=T))
+Sum_Terror
+
+ggplot(Sum_Terror, aes(x=Region,y=SumCasualties))+geom_col(fill="blue")+theme(axis.text.x=element_text(angle=90))
+```
+
+As shown in the figure 1, the number of casualities caused by terrorist attack differs significantly by region. SumTerror is the total number of terrorism fatalities from year 1970 to 2017. While East Asia has less than 1,000 fatalities since 1970, Middle East & North Africa had more than 50,000 fatalities during the last 5 decades. We decided to provide this graph to see how much variation there is between regions and to provide a better understanding of the regions we will be studying forward. 
+
+####Figure 2
+```{r}
+ggplot(terror_region, aes(x=Year,y=Terror_Casualties))+geom_line()+facet_wrap(~Region)+geom_vline(xintercept=2001,col="red")
+```
+
+Figure 2 shows how terrorist incidents have evolved in different regions.The red line indicates year 2001, when the 9/11 occured. From 1970 to 2017, we could observe that the degree of terrorism fatalities increased at a rapid pace compared to the years before in the following regions: Middle East & North Africa, Sub-Saharan Africa, and South Asia.
+
+####Figure 3
+```{r}
+ggplot(terror_region, aes(x=Year,y=Terror_Casualties,fill=Region))+geom_area(position="stack")+geom_vline(xintercept=2001,col="red")
+```
+
+Figure 3 shows the magnitude of fatalities from terrorist attacks aggregated by region before & after 9/11. Prior to the incident, there were 4396 fatalities world wide in year 2000. However in the subsequent year, the number of fatalities spiked to 7,729 and later peaked to 44,486 in 2014. As vividly shown in the graph,the frequency of casualtiespost 9/11 increases dramatically. 
+
+####Figure 4
+
+```{r, message=FALSE, warning=FALSE}
+plot_ly(terror_region, x=~Year, y=~Terror_Casualties, mode="line", color = ~Region)
+```
+
+Figure 4 is a holistic representaiton of the changes in the number of terror attack by region over time. This is an interactive graph to aid reader's understanding. 
+
+###Conclusion
+In the chart above we see the number of fatalities from terrorist attacks aggregated by region. Since 9/11, we observed that over the past decade, the number of terrorism has drastically increased in Middle East & Africa. In 2017, of the total terror occurrence in the world, approximately 75 percent of terror-related fatalities occurred in the Middle East & Africa region, near 25% in South and Southeast Asia, less than 1% percent in Europe, and less than 0.5% in the Americas. Moreover, regardless of the long-term trend post 2001, we also observed that in the year of and in the subsequent year, there was instant spike in the number of terrorism fataltities. Hence, we conclude that the number of fatalities from terror attack increased since the 9/11 incident not only in the US but also world-wide. Moving forward, we hope to study more on whether the increase in terrorism casualties is due to the increase in the frequency of terrorist attack or the scale of attack. 
+
